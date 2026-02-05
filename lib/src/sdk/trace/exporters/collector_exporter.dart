@@ -172,39 +172,19 @@ class CollectorExporter implements sdk.SpanExporter {
   }
 
   pb_trace.Span _spanToProtobuf(sdk.ReadOnlySpan span) {
-    pb_trace.Status_StatusCode statusCode;
-    switch (span.status.code) {
-      case api.StatusCode.unset:
-        statusCode = pb_trace.Status_StatusCode.STATUS_CODE_UNSET;
-        break;
-      case api.StatusCode.error:
-        statusCode = pb_trace.Status_StatusCode.STATUS_CODE_ERROR;
-        break;
-      case api.StatusCode.ok:
-        statusCode = pb_trace.Status_StatusCode.STATUS_CODE_OK;
-        break;
-    }
+    final statusCode = switch (span.status.code) {
+      api.StatusCode.unset => pb_trace.Status_StatusCode.STATUS_CODE_UNSET,
+      api.StatusCode.error => pb_trace.Status_StatusCode.STATUS_CODE_ERROR,
+      api.StatusCode.ok => pb_trace.Status_StatusCode.STATUS_CODE_OK,
+    };
 
-    pb_trace.Span_SpanKind spanKind;
-    switch (span.kind) {
-      case api.SpanKind.client:
-        spanKind = pb_trace.Span_SpanKind.SPAN_KIND_CLIENT;
-        break;
-      case api.SpanKind.consumer:
-        spanKind = pb_trace.Span_SpanKind.SPAN_KIND_CONSUMER;
-        break;
-      case api.SpanKind.internal:
-        spanKind = pb_trace.Span_SpanKind.SPAN_KIND_INTERNAL;
-        break;
-      case api.SpanKind.producer:
-        spanKind = pb_trace.Span_SpanKind.SPAN_KIND_PRODUCER;
-        break;
-      case api.SpanKind.server:
-        spanKind = pb_trace.Span_SpanKind.SPAN_KIND_SERVER;
-        break;
-      default:
-        spanKind = pb_trace.Span_SpanKind.SPAN_KIND_UNSPECIFIED;
-    }
+    final spanKind = switch (span.kind) {
+      api.SpanKind.client => pb_trace.Span_SpanKind.SPAN_KIND_CLIENT,
+      api.SpanKind.consumer => pb_trace.Span_SpanKind.SPAN_KIND_CONSUMER,
+      api.SpanKind.internal => pb_trace.Span_SpanKind.SPAN_KIND_INTERNAL,
+      api.SpanKind.producer => pb_trace.Span_SpanKind.SPAN_KIND_PRODUCER,
+      api.SpanKind.server => pb_trace.Span_SpanKind.SPAN_KIND_SERVER,
+    };
 
     return pb_trace.Span(
       traceId: span.spanContext.traceId.get(),
@@ -232,51 +212,44 @@ class CollectorExporter implements sdk.SpanExporter {
   }
 
   pb_common.AnyValue _attributeValueToProtobuf(Object value) {
-    switch (value.runtimeType) {
-      case String:
-        return pb_common.AnyValue(stringValue: value as String);
-      case bool:
-        return pb_common.AnyValue(boolValue: value as bool);
-      case double:
-        return pb_common.AnyValue(doubleValue: value as double);
-      case int:
-        return pb_common.AnyValue(intValue: Int64(value as int));
-      case List:
-        final list = value as List;
-        if (list.isNotEmpty) {
-          switch (list[0].runtimeType) {
-            case String:
-              final values = [] as List<pb_common.AnyValue>;
-              for (final str in list) {
-                values.add(pb_common.AnyValue(stringValue: str));
-              }
-              return pb_common.AnyValue(
-                  arrayValue: pb_common.ArrayValue(values: values));
-            case bool:
-              final values = [] as List<pb_common.AnyValue>;
-              for (final b in list) {
-                values.add(pb_common.AnyValue(boolValue: b));
-              }
-              return pb_common.AnyValue(
-                  arrayValue: pb_common.ArrayValue(values: values));
-            case double:
-              final values = [] as List<pb_common.AnyValue>;
-              for (final d in list) {
-                values.add(pb_common.AnyValue(doubleValue: d));
-              }
-              return pb_common.AnyValue(
-                  arrayValue: pb_common.ArrayValue(values: values));
-            case int:
-              final values = [] as List<pb_common.AnyValue>;
-              for (final i in list) {
-                values.add(pb_common.AnyValue(intValue: i));
-              }
-              return pb_common.AnyValue(
-                  arrayValue: pb_common.ArrayValue(values: values));
-          }
-        }
-    }
-    return pb_common.AnyValue();
+    return switch (value) {
+      String() => pb_common.AnyValue(stringValue: value),
+      bool() => pb_common.AnyValue(boolValue: value),
+      double() => pb_common.AnyValue(doubleValue: value),
+      int() => pb_common.AnyValue(intValue: Int64(value)),
+      List() when value.isNotEmpty => switch (value.first) {
+          String() => pb_common.AnyValue(
+              arrayValue: pb_common.ArrayValue(
+                values: value
+                    .map((e) => pb_common.AnyValue(stringValue: e as String))
+                    .toList(),
+              ),
+            ),
+          bool() => pb_common.AnyValue(
+              arrayValue: pb_common.ArrayValue(
+                values: value
+                    .map((e) => pb_common.AnyValue(boolValue: e as bool))
+                    .toList(),
+              ),
+            ),
+          double() => pb_common.AnyValue(
+              arrayValue: pb_common.ArrayValue(
+                values: value
+                    .map((e) => pb_common.AnyValue(doubleValue: e as double))
+                    .toList(),
+              ),
+            ),
+          int() => pb_common.AnyValue(
+              arrayValue: pb_common.ArrayValue(
+                values: value
+                    .map((e) => pb_common.AnyValue(intValue: Int64(e as int)))
+                    .toList(),
+              ),
+            ),
+          _ => pb_common.AnyValue(),
+        },
+      _ => pb_common.AnyValue(),
+    };
   }
 
   @Deprecated(
