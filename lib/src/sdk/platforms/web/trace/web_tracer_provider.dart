@@ -5,7 +5,7 @@ import '../../../../../api.dart' as api;
 import '../../../../../sdk.dart' as sdk;
 import '../../../trace/tracer.dart';
 
-/// A [api.TracerProvider] which implements features specific to `dart:html`.
+/// A [api.TracerProvider] which implements features specific to `package:web`.
 ///
 /// Use of [WebTracerProvider] with this provider results in a [api.Tracer]
 /// which uses the `window.performance` API for high-precision timestamps
