@@ -22,15 +22,15 @@ analyze:
 	@dart analyze
 
 format:
-	@find ./lib -name '*.dart' -not -path './lib/src/sdk/proto/opentelemetry/*' | xargs dart format --fix
-	@find ./test/ -name '*.dart' | xargs dart format --fix
+	@find ./lib -name '*.dart' -not -path './lib/src/sdk/proto/opentelemetry/*' | xargs dart format
+	@find ./test/ -name '*.dart' | xargs dart format
 	@./scripts/attach_copyright.sh
 
 test:
 	@dart test ./test \
 		--chain-stack-traces \
-		--platform vm \
-		--platform chrome
+		--platform vm,chrome \
+		-c dart2js,dart2wasm
 
 changelog:
 	# requires the ruby gem: gem install github_changelog_generator

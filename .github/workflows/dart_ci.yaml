@@ -17,7 +17,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  test-dartv2:
+  test-dartv3_4:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -25,8 +25,8 @@ jobs:
           submodules: true
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: 2.19.6
-      - run: sudo apt install -y protobuf-compiler
+          sdk: 3.9
+      - run: sudo apt-get update && sudo apt-get install -y --fix-missing protobuf-compiler
       - run: make init format analyze test
       - name: Generate Coverage
         run: dart test --coverage=./coverage
@@ -41,7 +41,7 @@ jobs:
       - name: Package Artifacts
         run: ./package.sh
 
-  test-dartv3:
+  test-dartvStable:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -49,6 +49,6 @@ jobs:
           submodules: true
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: 3.2.0
-      - run: sudo apt install -y protobuf-compiler
+          sdk: stable
+      - run: sudo apt-get update && sudo apt-get install -y --fix-missing protobuf-compiler
       - run: make init format analyze test
